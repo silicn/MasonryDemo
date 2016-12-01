@@ -10,8 +10,23 @@
 
 #import <Masonry.h>
 
+#import "MasViewController.h"
 
-@interface ViewController ()
+
+
+#define kScreenWidth [UIScreen mainScreen].bounds.size.width
+
+#define kScreenHeight [UIScreen mainScreen].bounds.size.height
+
+
+
+@interface ViewController ()<UIScrollViewDelegate,UITableViewDelegate,UITableViewDataSource>
+
+@property (weak, nonatomic) IBOutlet UIScrollView *scrollerView;
+
+@property (nonatomic, strong) UITableView *tableView;
+
+
 
 @end
 
@@ -20,54 +35,82 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    UIView *view = [UIView new];
-    view.backgroundColor = [UIColor cyanColor];
+  
+    self.scrollerView.contentSize = CGSizeMake(kScreenWidth * 2, self.scrollerView.bounds.size.height);
     
-    [self.view addSubview:view];
-    [view mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(self.view.mas_topMargin).offset(100);
-        make.centerX.equalTo(self.view.mas_centerX);
-        make.height.equalTo(@44);
-        make.width.equalTo(@300);
-        
+    UITableView *tableView = [[UITableView alloc]initWithFrame:CGRectZero style:UITableViewStylePlain];
+    tableView.delegate = self;
+    tableView.dataSource = self;
+    tableView.backgroundColor = [UIColor orangeColor];
+    [tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
+    [self.scrollerView addSubview:tableView];
+    
+    self.tableView = tableView;
+    
+    
+    [tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.equalTo(self.scrollerView.mas_width);
+        make.height.equalTo(self.scrollerView.mas_height).offset(-64);
     }];
     
     
-    UILabel *label = [UILabel new];
+    UITableView *tableV = [[UITableView alloc]initWithFrame:CGRectZero style:UITableViewStylePlain];
     
-    label.backgroundColor = [UIColor cyanColor];
+    [self.scrollerView addSubview:tableV];
     
-    label.text = @"好好爱好好好好哈嗷嗷好好好";
+    tableV.delegate  = self;
+    tableV.dataSource = self;
     
-    [self.view addSubview:label];
+    [tableV registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
     
-    [label mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.equalTo(view.mas_centerX);
-        make.top.equalTo(view.mas_bottom).offset(8);
-        make.height.equalTo(@44);
-        
+    tableV.backgroundColor = [UIColor redColor];
+   
+    [tableV mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(tableView.mas_right);
+        make.top.mas_equalTo(tableView);
+        make.height.mas_equalTo(tableView);
+        make.width.mas_equalTo(tableView);
     }];
     
-    UIImageView *imageview = [UIImageView new];
-    
-    imageview.backgroundColor = [UIColor redColor];
-    
-    [self.view addSubview:imageview];
-    
-    [imageview mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.size.equalTo([NSValue valueWithCGSize:CGSizeMake(100, 100)]);
-        make.topMargin.equalTo(label.mas_bottom).offset(20);
-        make.centerX.equalTo(label.mas_centerX);
-        
-    }];
-    
-    
-    
-    
+    NSLog(@"%@  %@",tableView,self.scrollerView);
+
     
     // Do any additional setup after loading the view, typically from a nib.
 }
 
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 20;
+}
+
+// Row display. Implementers should *always* try to reuse cells by setting each cell's reuseIdentifier and querying for available reusable cells with dequeueReusableCellWithIdentifier:
+// Cell gets various attributes set automatically based on table (separators) and data source (accessory views, editing controls)
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
+    if (tableView == self.tableView) {
+        cell.backgroundColor = [UIColor lightGrayColor];
+    }
+    return cell;
+}
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+    NSLog(@"%s",__FUNCTION__);
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    MasViewController  *vc = [MasViewController new];
+    
+    [self.navigationController pushViewController:vc animated:YES];
+    
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
